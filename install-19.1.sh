@@ -28,7 +28,7 @@ for i in $mflags; do
     p=1
   fi
 done
-echo "number of cups: "$num_core
+echo "number of cpus: "$num_core
 echo "tuning option: "$mop
 
 #
