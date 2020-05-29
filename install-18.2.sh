@@ -4,32 +4,32 @@ num_core=`grep 'core id' /proc/cpuinfo | sort -u | wc -l`
 mflags=`grep 'flags' /proc/cpuinfo`
 for i in $mflags; do
   if [ $i = "avx2" ] && [ $((p)) -lt 6 ]; then
-    mop="avx2"
+    mop="-mavx2"
     p=6
   fi
   if [ $i = "avx" ] && [ $((p)) -lt 5 ]; then
-    mop="avx"
+    mop="-mavx"
     p=5
   fi
   if [ $i = "sse4_2" ] && [ $((p)) -lt 4 ]; then
-    mop="sse4.2"
+    mop="-msse4.2"
     p=4
   fi
   if [ $i = "sse4_1" ] && [ $((p)) -lt 3 ]; then
-    mop="sse4.1"
+    mop="-msse4.1"
     p=3
   fi
   if [ $i = "ssse3" ] && [ $((p)) -lt 2 ]; then
-    mop="ssse3"
+    mop="-mssse3"
     p=2
   fi
   if [ $i = "sse2" ] && [ $((p)) -lt 2 ]; then
-    mop="sse2"
+    mop="-msse2"
     p=1
   fi
 done
 echo "number of cups: "$num_core
-echo "tuning option: -m"$mop
+echo "tuning option: "$mop
 
 #
 if [ -d ./dftbplus-18.2 ];
@@ -42,10 +42,9 @@ fi
 
 echo "++++++++++download++++++++++"
 sudo apt update
-sudo apt install -y unzip
 sudo apt install -y g++
 sudo apt install -y gcc
-sudo apt install -y bulid-essential
+sudo apt install -y build-essential
 sudo apt install -y gfortran
 sudo apt install -y libopenmpi-dev
 sudo apt install -y m4
@@ -77,14 +76,9 @@ sudo apt install -y jmol
 echo "++++++++++unpack++++++++++"
 tar zxvf dftbplus-18.2.tar.gz
 cd dftbplus-18.2
-#git submodule update --init --recursive
-#./utils/get_opt_externals ALL
 
 echo "++++++++++compiling++++++++++"
-#mkdir _build
-#cd _build
-#cmake -DWITH_DFTD3=true -DWITH_TRANSPORT=true -DFYPP_FLAGS="-DTRAVIS" -DWITH_ARPACK=true -DCMAKE_TOOLCHAIN_FILE=../sys/gnu.cmake ..
-sed -i "s/avx2/$mop/g" make.arch
+sed -i "s/-mavx2/$mop/g" make.arch
 make -j${num_core}
 make test TEST_MPI_PROCS=${num_core} TEST_OMP_THREADS=2 
 make install
@@ -93,6 +87,3 @@ echo "++++++++++dptools setting++++++++++"
 cd ~/dftbplus-18.2/tools/dptools
 sudo python3 setup.py install
 
-echo "++++++++++tests++++++++++"
-#cd ~/dftbplus-18.2/_build
-#ctest
